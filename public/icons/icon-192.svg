@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bg-gradient-192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="50%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Rounded Background Container -->
+  <rect width="192" height="192" rx="48" fill="#09090b" />
+  <rect x="10" y="10" width="172" height="172" rx="38" fill="url(#bg-gradient-192)" opacity="0.18" />
+  <rect x="10" y="10" width="172" height="172" rx="38" stroke="url(#bg-gradient-192)" stroke-width="3" fill="none" opacity="0.5" />
+
+  <!-- Center Sparkle -->
+  <g transform="translate(38, 38) scale(0.226)">
+    <path d="M256 32 C256 155 357 256 480 256 C357 256 256 357 256 480 C256 357 155 256 32 256 C155 256 256 155 256 32 Z" 
+          fill="url(#bg-gradient-192)" />
+    <path d="M416 96 C416 137 450 171 491 171 C450 171 416 205 416 246 C416 205 382 171 341 171 C382 171 416 137 416 96 Z" 
+          fill="#38bdf8" />
+  </g>
+</svg>
