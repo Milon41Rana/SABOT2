@@ -335,6 +335,42 @@ export default function App() {
         throw new Error(errorData.error || `HTTP error ${response.status}`);
       }
 
+      const contentType = response.headers.get('content-type') || '';
+
+      // 1. Direct JSON Response (Netlify Serverless Function)
+      if (contentType.includes('application/json')) {
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        const replyText = data.text || 'দুঃখিত, কোনো উত্তর পাওয়া যায়নি।';
+        const groundingChunks = Array.isArray(data.groundingChunks) ? data.groundingChunks : [];
+        const webSearchQueries = Array.isArray(data.webSearchQueries) ? data.webSearchQueries : [];
+
+        setSessions((prevSessions) =>
+          prevSessions.map((s) => {
+            if (s.id === activeSession.id) {
+              const msgs = [...s.messages];
+              const targetIdx = msgs.findIndex((m) => m.id === assistantMessageId);
+              if (targetIdx !== -1) {
+                msgs[targetIdx] = {
+                  ...msgs[targetIdx],
+                  text: replyText,
+                  groundingChunks,
+                  webSearchQueries,
+                  isStreaming: false,
+                };
+              }
+              return { ...s, messages: msgs };
+            }
+            return s;
+          })
+        );
+        return;
+      }
+
+      // 2. Streaming Response (SSE Event Stream)
       const reader = response.body?.getReader();
       const decoder = new TextDecoder('utf-8');
 
@@ -412,6 +448,18 @@ export default function App() {
         }
       }
 
+      // If buffer still had non-SSE data (e.g. direct text or JSON)
+      if (!accumulatedText && buffer.trim()) {
+        try {
+          const rawParsed = JSON.parse(buffer.trim());
+          if (rawParsed.text) {
+            accumulatedText = rawParsed.text;
+          }
+        } catch {
+          accumulatedText = buffer.trim();
+        }
+      }
+
       // Stream completed normally
       setSessions((prevSessions) =>
         prevSessions.map((s) => {
@@ -421,6 +469,7 @@ export default function App() {
             if (targetIdx !== -1) {
               msgs[targetIdx] = {
                 ...msgs[targetIdx],
+                text: accumulatedText || msgs[targetIdx].text || 'দুঃখিত, কোনো উত্তর পাওয়া যায়নি।',
                 isStreaming: false,
               };
             }

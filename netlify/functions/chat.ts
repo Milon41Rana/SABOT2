@@ -110,6 +110,11 @@ export const handler: Handler = async (event) => {
     const groundingChunks = candidate?.groundingMetadata?.groundingChunks || [];
     const webSearchQueries = candidate?.groundingMetadata?.webSearchQueries || [];
 
+    let generatedText = response.text || '';
+    if (!generatedText && candidate?.content?.parts) {
+      generatedText = candidate.content.parts.map((p: any) => p.text || '').join('');
+    }
+
     return {
       statusCode: 200,
       headers: {
@@ -117,7 +122,7 @@ export const handler: Handler = async (event) => {
         'Access-Control-Allow-Origin': '*',
       },
       body: JSON.stringify({
-        text: response.text || '',
+        text: generatedText || 'দুঃখিত, কোনো উত্তর তৈরি করা সম্ভব হয়নি।',
         model: 'gemini-3.1-flash-lite',
         groundingChunks,
         webSearchQueries,
